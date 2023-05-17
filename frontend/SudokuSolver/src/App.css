@@ -1,0 +1,36 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.grid {
+  outline: solid 3px black;
+  outline-offset: -3px;
+}
+
+.cellInput {
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  font-size: 24px;
+  color: black;
+  background-color: azure;
+  border: 0px solid black;
+}
+
+.bBorder {
+  border-bottom: 3px solid black;
+}
+
+.nBorder {
+  display: table-cell;
+  border: 1px solid black;
+}
+
+.rBorder {
+  display: table-cell;
+  border: 1px solid black;
+  border-right: 3px solid black;
+}

@@ -1,3 +1,6 @@
 from django.db import models
 
-# Create your models here.
+class SolvedPuzzle(models.Model):
+    problem = models.JSONField()
+    solution = models.JSONField()
+
