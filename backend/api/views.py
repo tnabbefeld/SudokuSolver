@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import SolvedPuzzle
+from .models import *
+from .serializers import *
 import copy
 
 from .utils import solve_sudoku
@@ -34,6 +35,5 @@ def solve_puzzle(request):
 @api_view(['GET'])
 def get_last_2(request):
     last_2 = SolvedPuzzle.objects.all().order_by('-pk')[:2]
-    print(last_2)
-    
-    return Response({"result": "fine"})
+    serializer = SolvedPuzzleSerializer(last_2, many=True)
+    return Response(serializer.data)
