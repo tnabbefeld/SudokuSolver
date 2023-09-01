@@ -19,13 +19,10 @@ def solve_puzzle(request):
     solution_found = solve_sudoku(solution)
 
     if(solution_found):
-        problem_json = {"problem": problem}
-        solution_json = {"solution": solution}
-
-        solved_puzzle = SolvedPuzzle(problem=problem_json, solution=solution_json)
+        solved_puzzle = SolvedPuzzle(problem=problem, solution=solution)
         solved_puzzle.save()
 
-        return Response(solution_json)
+        return Response({"solution": solution})
 
     return False
 

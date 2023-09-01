@@ -8,9 +8,9 @@ interface CellProps {
   handleGridChange: (rowIndex: number, colIndex: number, value: number) => void;
 }
 
-function Cell({rowIndex, colIndex, value, handleGridChange}: CellProps ) {
+function Cell({ rowIndex, colIndex, value, handleGridChange }: CellProps) {
   return (
-    <input value={value} className='cellInput' onChange={(e) => handleGridChange(rowIndex, colIndex, parseInt(e.target.value) || 0)} />
+    <input value={value} className='cellInput' maxLength={1} onChange={(e) => handleGridChange(rowIndex, colIndex, parseInt(e.target.value) || 0)} />
   );
 }
 
@@ -19,17 +19,45 @@ interface GridProps {
   handleGridChange: (rowIndex: number, colIndex: number, value: number) => void;
 }
 
-function Grid({grid, handleGridChange}: GridProps) {
+function Grid({ grid, handleGridChange }: GridProps) {
   return (
     <div className='grid'>
       {grid.map((row: number[], rowIndex: number) =>
-        <div key={rowIndex} className={(rowIndex + 1) % 3 == 0 ? 'bBorder' : ''}>
+        <div key={rowIndex} className={(rowIndex + 1) % 3 == 0 ? 'bRowBorder' : 'nRowBorder'}>
           {row.map((value: number, colIndex: number) =>
             <div key={colIndex} className={(colIndex + 1) % 3 == 0 ? 'rBorder' : 'nBorder'}>
               <Cell rowIndex={rowIndex} colIndex={colIndex} value={value} handleGridChange={handleGridChange} />
             </div>
           )}
         </div>
+      )}
+    </div>
+  );
+}
+
+interface HistCellProps {
+  value: number;
+}
+
+function HistCell({ value }: HistCellProps) {
+  return (
+    <input value={value} className='histCellInput' readOnly />
+  );
+}
+
+interface HistGridProps {
+  grid: number[][];
+}
+
+function HistGrid({ grid }: HistGridProps) {
+  return (
+    <div className='histGrid'>
+      {grid.map((row: number[], rowIndex: number) =>
+        row.map((value: number, colIndex: number) =>
+          <div key={(rowIndex + 1) * (colIndex + 1)} className={(rowIndex + 1) % 3 == 0 ? ((colIndex + 1) % 3 == 0 ? 'brHistBorder' : 'bHistBorder') : ((colIndex + 1) % 3 == 0 ? 'rHistBorder' : 'histBorder')}>
+            <HistCell value={value} />
+          </div>
+        )
       )}
     </div>
   );
@@ -48,6 +76,8 @@ function App() {
     [0, 0, 5, 2, 0, 6, 3, 0, 0]
   ]);
 
+  const [histGrids, setHistGrids] = useState<number[][][]>(new Array<number[][]>(2).fill(new Array<number[]>(9).fill(new Array<number>(9).fill(0))));
+
   function handleGridChange(rowIndex: number, colIndex: number, value: number) {
     const newGrid = JSON.parse(JSON.stringify(grid));
     newGrid[rowIndex][colIndex] = value;
@@ -55,6 +85,7 @@ function App() {
   }
 
   async function handleSolvePuzzle() {
+    handleGetLast2();
     const response = await fetch('http://127.0.0.1:8000/api/solve_puzzle/', {
       method: "POST",
       headers: {
@@ -69,6 +100,18 @@ function App() {
     setGrid(solution);
   }
 
+  async function handleGetLast2() {
+    const response = await fetch('http://127.0.0.1:8000/api/get_last_2/', {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      }
+    });
+    const json = await response.json();
+    const history = [json[0].solution, json[1].solution];
+    setHistGrids(history);
+  }
+
   function handleClearPuzzle() {
     const newGrid = new Array(9).fill(new Array(9).fill(0));
     setGrid(newGrid);
@@ -76,8 +119,17 @@ function App() {
 
   return (
     <>
-      <Grid grid={grid} handleGridChange={handleGridChange} />
-      <div>
+      <div className='headerContainer'>
+        <h1 className='headerText'>Sudoku Solver</h1>
+      </div>
+      <div className='puzzleContainer'>
+        <Grid grid={grid} handleGridChange={handleGridChange} />
+      </div>
+      <div className='historyContainer'>
+        <HistGrid grid={histGrids[0]} />
+        <HistGrid grid={histGrids[1]} />
+      </div>
+      <div className='buttonsContainer'>
         <button onClick={() => handleSolvePuzzle()}>Solve</button>
         <button onClick={() => handleClearPuzzle()}>Clear</button>
       </div>
